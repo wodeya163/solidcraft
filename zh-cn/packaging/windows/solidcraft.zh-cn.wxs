@@ -24,7 +24,8 @@
       UpgradeCode="6A145FD6-D285-428D-AE84-A69570CDF4DB"
       Scope="perMachine"
       Compressed="yes"
-      Language="1033">
+      Language="2052"
+      Codepage="936">
     <SummaryInformation Description="SolidCraft 中文版 - 参数化三维 CAD" Manufacturer="SolidCraft 中文版（wodeya163）" />
     <!-- Same-version upgrades let successive pre-releases of one X.Y.Z replace each other.
          The new version is installed first and the old one removed afterwards
@@ -47,7 +48,8 @@
          then restarted the PC by itself when a file was in use (#18774). A file that is in use is
          replaced at the next restart instead. -->
     <Property Id="REBOOT" Value="ReallySuppress" />
-    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+    <!-- 中文版改用 mszip：630 MB 二进制的 LZX(high) 压缩耗时过长，mszip 构建更快、仍可正常安装。 -->
+    <MediaTemplate EmbedCab="yes" CompressionLevel="mszip" />
 
     <!-- This MSI icon is only for Programs and Features. A shortcut must use the installed
          executable's embedded icon instead: Windows caches an MSI Icon-table image under the

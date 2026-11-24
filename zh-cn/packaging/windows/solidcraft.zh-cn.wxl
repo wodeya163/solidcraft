@@ -5,7 +5,7 @@
   向导显示的文字由下面的中文覆盖；未覆盖的按钮沿用扩展自带资源。
   构建命令：-culture en-US -loc solidcraft.zh-cn.wxl
 -->
-<WixLocalization Culture="en-US" xmlns="http://wixtoolset.org/schemas/v4/wxl">
+<WixLocalization Culture="en-US" Codepage="936" xmlns="http://wixtoolset.org/schemas/v4/wxl">
   <String Id="WelcomeDlgTitle" Value="{\WixUI_Font_Bigger}欢迎使用 [ProductName] [SolidcraftVersion] 安装向导" />
   <String Id="WelcomeDlgDescription" Value="安装向导将在您的计算机上安装 [ProductName] [SolidcraftVersion]。点击「下一步」继续，或点击「取消」退出安装向导。" />
   <String Id="InstallDirDlgTitle" Value="{\WixUI_Font_Bigger}选择安装位置" />

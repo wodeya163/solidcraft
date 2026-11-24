@@ -154,13 +154,14 @@ if (-not $SkipPortable) {
 # ---- 稳定名副本、校验表、更新清单 ----------------------------------------------
 Write-Host '==> 生成发布资产'
 $publish = @()
+# 校验表只列会发布到远程的稳定名资产（内置更新器也按这些名字找包）
 if (Test-Path $Msi) {
     Copy-Item $Msi (Join-Path $Dist $AssetMsi) -Force
-    $publish += @($AssetMsi, [IO.Path]::GetFileName($Msi))
+    $publish += $AssetMsi
 }
 if (Test-Path $Zip) {
     Copy-Item $Zip (Join-Path $Dist $AssetZip) -Force
-    $publish += @($AssetZip, [IO.Path]::GetFileName($Zip))
+    $publish += $AssetZip
 }
 
 $sums = @()
