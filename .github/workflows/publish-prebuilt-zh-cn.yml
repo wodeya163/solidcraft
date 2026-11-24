@@ -1,0 +1,99 @@
+name: 中文版云端重打包与发布
+
+# 本机上行带宽受限时，用 GitHub 内网下载上游二进制、重新打中文包并上传 Release。
+# 与 release-zh-cn.yml 的区别：不编译 Rust，直接用上游官方便携版二进制。
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '中文版版本号（如 0.48.2）'
+        required: true
+        default: '0.48.2'
+      upstream:
+        description: '上游版本标签（如 v0.48.1）'
+        required: true
+        default: 'v0.48.1'
+      publish:
+        description: '上传到 v<version> Release'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  repackage:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      VERSION: ${{ inputs.version }}
+      UPSTREAM: ${{ inputs.upstream }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 下载上游 Windows x64 便携版
+        shell: pwsh
+        run: |
+          $num = ($env:UPSTREAM).TrimStart('v')
+          $url = "https://github.com/tangency-labs/solidcraft/releases/download/$env:UPSTREAM/solidcraft-$num-windows-x64-portable.zip"
+          Write-Host "下载 $url"
+          Invoke-WebRequest -Uri $url -OutFile upstream.zip -UseBasicParsing
+          $f = Get-Item upstream.zip
+          if ($f.Length -lt 100MB) { throw "上游便携版异常：$($f.Length) 字节" }
+          Write-Host "已下载：$([math]::Round($f.Length / 1MB, 1)) MB"
+
+      - name: 安装 WiX v5 与扩展
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          wix extension add -g WixToolset.UI.wixext/5.0.2
+          wix extension add -g WixToolset.Util.wixext/5.0.2
+          wix --version
+
+      - name: 生成中文 MSI / 便携版 / 校验表 / 更新清单
+        shell: pwsh
+        run: |
+          ./zh-cn/packaging/windows/package-zh-cn.ps1 `
+            -Version $env:VERSION -UpstreamVersion ($env:UPSTREAM).TrimStart('v') `
+            -PortableZip upstream.zip -Dist dist/release
+          Get-Content dist/release/SHA256SUMS.txt
+
+      - name: 冒烟测试
+        shell: pwsh
+        run: |
+          $cli = Get-ChildItem dist/release -Recurse -Filter solidcraft-cli.exe | Select-Object -First 1
+          & $cli.FullName --version
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: solidcraft-zh-cn-${{ inputs.version }}-windows-x64
+          path: dist/release/*
+          if-no-files-found: error
+
+      - name: 发布到 Release（清理同名未完成资产后上传）
+        if: ${{ inputs.publish }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "v$env:VERSION"
+          $assets = gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$tag" | ConvertFrom-Json
+          $list = gh api "repos/$env:GITHUB_REPOSITORY/releases/$($assets.id)/assets?per_page=100" | ConvertFrom-Json
+          $names = @('solidcraft-windows-x64.msi','solidcraft-windows-x64-portable.zip','SHA256SUMS.txt','latest.json')
+          foreach ($a in $list) {
+            if ($a.name -in $names) {
+              Write-Host "删除旧资产 $($a.name) (state=$($a.state))"
+              gh api -X DELETE "repos/$env:GITHUB_REPOSITORY/releases/assets/$($a.id)" | Out-Null
+            }
+          }
+          $files = @(
+            'dist/release/solidcraft-windows-x64.msi',
+            'dist/release/solidcraft-windows-x64-portable.zip',
+            'dist/release/SHA256SUMS.txt',
+            'dist/release/latest.json'
+          )
+          gh release upload $tag $files --clobber
+          gh release view $tag --json tagName,isLatest,assets
