@@ -29,18 +29,22 @@ use crate::SolveApp;
 use crate::ui_kit;
 use solidcraft_theme::Tokens;
 
-/// The repository releases come from.
-pub const REPO: &str = "tangency-labs/solidcraft";
-/// The one request an update check makes.
-pub const LATEST_API: &str = "https://api.github.com/repos/tangency-labs/solidcraft/releases/latest";
-/// Where Download goes when no package fits this installation.
-pub const RELEASES_PAGE: &str = "https://github.com/tangency-labs/solidcraft/releases/latest";
-/// Release pages and assets must be on GitHub, under this repository. The repository moved to the
-/// `tangency-labs` organisation, so releases may still name either owner (older releases and the
-/// links GitHub redirects keep the old one).
-const RELEASE_PREFIXES: [&str; 2] = ["https://github.com/bherbruck/solidcraft/releases/", "https://github.com/tangency-labs/solidcraft/releases/"];
+/// 中文定制版的发布仓库（自动更新检查、发行说明与安装包都取自这里）。
+pub const REPO: &str = "wodeya163/solidcraft";
+/// 更新检查唯一发出的请求：`releases/latest`。
+pub const LATEST_API: &str = "https://api.github.com/repos/wodeya163/solidcraft/releases/latest";
+/// 找不到匹配本机的安装包时，Download 打开的发行页。
+pub const RELEASES_PAGE: &str = "https://github.com/wodeya163/solidcraft/releases/latest";
+/// 发行页与安装包必须来自 GitHub 且属于以下仓库。上游的两个地址仍被接受，
+/// 便于旧版本发行说明中的链接和 GitHub 重定向继续有效；中文定制版新增
+/// `wodeya163/solidcraft` 作为发布源。
+const RELEASE_PREFIXES: [&str; 3] = [
+    "https://github.com/bherbruck/solidcraft/releases/",
+    "https://github.com/tangency-labs/solidcraft/releases/",
+    "https://github.com/wodeya163/solidcraft/releases/",
+];
 
-/// A release page or asset URL: github.com, one of the two owners, exactly `solidcraft`, then
+/// A release page or asset URL: github.com, one of the three owners, exactly `solidcraft`, then
 /// `/releases/` (the trailing slash rules out look-alike names such as `solidcraft-evil`).
 fn is_release_url(url: &str) -> bool {
     RELEASE_PREFIXES.iter().any(|p| url.starts_with(p))
@@ -112,7 +116,7 @@ pub fn comparable(v: &semver::Version) -> semver::Version {
 /// candidate and nightly releases are all tagged `v<version>`), else, for a development build or
 /// a string that is not a version, the release history.
 pub fn release_notes_url(version: &str, release_build: bool) -> String {
-    const HISTORY: &str = "https://github.com/tangency-labs/solidcraft/releases";
+    const HISTORY: &str = "https://github.com/wodeya163/solidcraft/releases";
     if release_build && parse_version(version).is_some() && version.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '+')) {
         format!("{HISTORY}/tag/v{version}")
     } else {

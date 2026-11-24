@@ -496,8 +496,8 @@ mod tests {
         assert_eq!(Locale::for_language("zh-TW").name(), "繁體中文");
         assert_eq!(effective_language("de"), "de");
         assert_eq!(effective_language("ja"), "ja");
-        // A first start has no saved language: the default follows the system.
-        assert_eq!(crate::prefs::Prefs::default().language, SYSTEM);
+        // 中文定制版首次启动默认为简体中文；用户保存过的语言仍然优先。
+        assert_eq!(crate::prefs::Prefs::default().language, "zh");
         // A saved choice in the settings file wins over the default.
         let saved: crate::prefs::Prefs = serde_json::from_str(r#"{"language":"ja"}"#).unwrap();
         assert_eq!(saved.language, "ja");

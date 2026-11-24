@@ -1,0 +1,98 @@
+name: 中文版编译与发布
+
+# 手动触发或推送 release-zh-cn 分支：编译 Windows x64 中文版并（可选）发布到本仓库 releases/latest。
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '发布版本（纯数字三段，如 0.48.2）'
+        required: true
+        default: '0.48.2'
+      publish:
+        description: '创建 GitHub Release 并上传到 releases/latest'
+        type: boolean
+        default: false
+  push:
+    branches: [release-zh-cn]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-zh-cn-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows-x64:
+    runs-on: windows-latest
+    timeout-minutes: 360
+    env:
+      VERSION: ${{ inputs.version || '0.48.2' }}
+      SOLIDCRAFT_VERSION: ${{ inputs.version || '0.48.2' }}
+      CARGO_TERM_COLOR: always
+      CARGO_INCREMENTAL: 0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 安装 Rust 1.99.1（MSVC x64）
+        uses: dtolnay/rust-toolchain@1.99.1
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-zh-cn-windows-x64
+
+      - name: 安装 WiX v5 与扩展
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          wix extension add -g WixToolset.UI.wixext/5.0.2
+          wix extension add -g WixToolset.Util.wixext/5.0.2
+          wix --version
+
+      - name: 编译主程序与 CLI（静态 CRT）
+        shell: pwsh
+        run: |
+          $flag = 'CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUSTFLAGS'
+          [Environment]::SetEnvironmentVariable($flag, '-C target-feature=+crt-static')
+          cargo build --release --locked -p solidcraft --target x86_64-pc-windows-msvc
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo build --release --locked -p solidcraft-cli --target x86_64-pc-windows-msvc
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 打包中文安装版
+        shell: pwsh
+        run: |
+          ./zh-cn/packaging/windows/package-zh-cn.ps1 `
+            -Version $env:VERSION `
+            -BinDir 'target/x86_64-pc-windows-msvc/release' `
+            -Dist 'dist/release'
+          Get-Content dist/release/SHA256SUMS.txt
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: solidcraft-zh-cn-windows-x64-${{ env.VERSION }}
+          path: dist/release/*
+          if-no-files-found: error
+
+      - name: 发布到 releases/latest
+        if: ${{ inputs.publish == true }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "v$env:VERSION"
+          $assets = @(
+            'dist/release/solidcraft-windows-x64.msi',
+            'dist/release/solidcraft-windows-x64-portable.zip',
+            'dist/release/SHA256SUMS.txt',
+            'dist/release/latest.json'
+          )
+          gh release create $tag $assets `
+            --title "SolidCraft 中文版 v$env:VERSION" `
+            --notes "中文界面｜中文安装向导｜自动更新关联 wodeya163/solidcraft releases/latest。详见 README.zh-CN.md。" `
+            --latest

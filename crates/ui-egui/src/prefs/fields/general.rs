@@ -43,9 +43,10 @@ macro_rules! general_preferences {
             /// private storage, so closing or reloading the tab doesn't ask through the browser's own
             /// "leave site?" box; the next visit offers them back. Off: the browser asks, as before.
             keep_unsaved_in_browser: bool = false, PAGE_GENERAL;
-            /// Interface language: a registered locale ID, or `system` to follow the system's language
-            /// on every start (#10138). A saved language keeps winning, so existing users don't change.
-            language: String = "system".into(), 0;
+            /// 界面语言：已注册的语言 ID。中文定制版默认简体中文（zh）；
+            /// 用户可在「首选项 → 常规 → 语言」里改回 `system` 跟随系统或其他语言。
+            /// 已保存的语言始终优先，不会覆盖用户选择（#10138）。
+            language: String = "zh".into(), 0;
             /// Folders linked files are loaded from when a design opens, besides the design's own folder
             /// (`link_folders_prompt`): those the user answered Load for. Kept in the user's settings,
             /// never in a design.

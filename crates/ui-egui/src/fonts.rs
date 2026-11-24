@@ -998,10 +998,10 @@ mod tests {
     }
 
     #[test]
-    fn default_ui_language_follows_the_system() {
-        // A first start follows the system (#10138); English, the fallback it lands on when
-        // nothing matches, needs no CJK face.
-        assert_eq!(crate::prefs::Prefs::default().language, solidcraft_ui_text::SYSTEM);
+    fn default_ui_language_is_simplified_chinese() {
+        // 中文定制版首次启动默认简体中文；zh 会加载 CJK 字体，英文回退不需要。
+        assert_eq!(crate::prefs::Prefs::default().language, "zh");
+        assert!(needs_cjk_font("zh"));
         assert!(!needs_cjk_font("en"));
     }
 
