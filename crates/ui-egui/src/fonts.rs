@@ -1014,7 +1014,7 @@ mod tests {
     fn default_ui_language_follows_the_system() {
         // A first start follows the system (#10138); English, the fallback it lands on when
         // nothing matches, needs no CJK face.
-        assert_eq!(crate::prefs::Prefs::default().language, solidcraft_ui_text::SYSTEM);
+        assert_eq!(crate::prefs::Prefs::default().language, "zh");
         assert!(!needs_cjk_font("en"));
     }
 

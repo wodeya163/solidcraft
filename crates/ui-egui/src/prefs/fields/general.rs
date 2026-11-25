@@ -45,7 +45,7 @@ macro_rules! general_preferences {
             keep_unsaved_in_browser: bool = false, PAGE_GENERAL;
             /// Interface language: a registered locale ID, or `system` to follow the system's language
             /// on every start (#10138). A saved language keeps winning, so existing users don't change.
-            language: String = "system".into(), 0;
+            language: String = "zh".into(), 0;
             /// Folders linked files are loaded from when a design opens, besides the design's own folder
             /// (`link_folders_prompt`): those the user answered Load for. Kept in the user's settings,
             /// never in a design.

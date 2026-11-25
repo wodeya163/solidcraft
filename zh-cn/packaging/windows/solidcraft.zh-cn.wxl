@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SolidCraft 中文版安装向导字符串（WiX v5）。
+  为复用 WixUI_InstallDir 的 en-US 资源，本文件 Culture 仍写 en-US，
+  向导显示的文字由下面的中文覆盖；未覆盖的按钮沿用扩展自带资源。
+  构建命令：-culture en-US -loc solidcraft.zh-cn.wxl
+-->
+<WixLocalization Culture="en-US" Codepage="936" xmlns="http://wixtoolset.org/schemas/v4/wxl">
+  <String Id="WelcomeDlgTitle" Value="{\WixUI_Font_Bigger}欢迎使用 [ProductName] [SolidcraftVersion] 安装向导" />
+  <String Id="WelcomeDlgDescription" Value="安装向导将在您的计算机上安装 [ProductName] [SolidcraftVersion]。点击「下一步」继续，或点击「取消」退出安装向导。" />
+  <String Id="InstallDirDlgTitle" Value="{\WixUI_Font_Bigger}选择安装位置" />
+  <String Id="InstallDirDlgDescription" Value="请选择 [ProductName] 的安装文件夹。" />
+  <String Id="InstallDirDlgFolderLabel" Value="安装文件夹：" />
+  <String Id="BrowseDlgTitle" Value="{\WixUI_Font_Bigger}更改安装文件夹" />
+  <String Id="BrowseDlgDescription" Value="请选择要安装到的文件夹。" />
+  <String Id="VerifyReadyDlgInstallTitle" Value="{\WixUI_Font_Title}准备安装 [ProductName] [SolidcraftVersion]" />
+  <String Id="VerifyReadyDlgInstallDescription" Value="点击「安装」开始安装，或点击「上一步」修改设置。" />
+  <String Id="ProgressDlgTitleInstalling" Value="{\WixUI_Font_Bigger}正在安装 [ProductName]" />
+  <String Id="ProgressDlgTextInstalling" Value="正在安装 [ProductName]，请稍候…" />
+  <String Id="ExitDialogTitle" Value="{\WixUI_Font_Bigger}[ProductName] [SolidcraftVersion] 安装完成" />
+  <String Id="ExitDialogDescription" Value="点击「完成」退出安装向导。" />
+  <String Id="MaintenanceTypeDlgTitle" Value="{\WixUI_Font_Bigger}更改、修复或卸载" />
+  <String Id="MaintenanceTypeDlgDescription" Value="请选择要对 [ProductName] 执行的操作。" />
+  <String Id="WixUINext" Value="下一步(&amp;N)" />
+  <String Id="WixUIBack" Value="上一步(&amp;B)" />
+  <String Id="WixUICancel" Value="取消" />
+  <String Id="WixUIFinish" Value="完成(&amp;F)" />
+  <String Id="WixUIInstall" Value="安装(&amp;I)" />
+  <String Id="WixUIBrowse" Value="浏览(&amp;R)…" />
+  <String Id="WixUIOK" Value="确定" />
+  <String Id="WixUIYes" Value="是(&amp;Y)" />
+  <String Id="WixUINo" Value="否(&amp;N)" />
+</WixLocalization>
