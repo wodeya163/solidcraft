@@ -998,7 +998,12 @@ pub const PLACEMENTS: &[(&str, &str, &str, &str)] = &[
 ];
 
 pub fn panels(tab: &str) -> Vec<&'static str> {
-    SECTIONS.iter().filter(|s| s.tab == tab).map(|s| s.panel).collect()
+    let mut panels: Vec<_> = SECTIONS.iter().filter(|s| s.tab == tab).map(|s| s.panel).collect();
+    if tab == "MODEL" {
+        const ORDER: &[&str] = &["SKETCH", "CREATE", "MODIFY", "CONSTRUCT", "ARRANGE", "CONFIGURE", "FINISH EDITING"];
+        panels.sort_by_key(|panel| ORDER.iter().position(|candidate| candidate == panel).unwrap_or(ORDER.len()));
+    }
+    panels
 }
 
 pub fn destination(c: &CommandSpec) -> Option<(&'static str, &'static str)> {

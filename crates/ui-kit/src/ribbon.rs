@@ -76,20 +76,20 @@ pub const COLLAPSED_WIDTH: f32 = 72.0;
 
 /// The gap after each panel (its separator).
 pub const PANEL_GAP: f32 = 1.0;
-pub const GROUP_HEIGHT: f32 = 86.0;
-pub const BUTTON_HEIGHT: f32 = 60.0;
-pub const ICON_BUTTON_HEIGHT: f32 = 36.0;
-pub const ICON_GROUP_HEIGHT: f32 = 62.0;
+pub const GROUP_HEIGHT: f32 = 92.0;
+pub const BUTTON_HEIGHT: f32 = 68.0;
+pub const ICON_BUTTON_HEIGHT: f32 = 40.0;
+pub const ICON_GROUP_HEIGHT: f32 = 68.0;
 
 pub const BUTTON_GAP: f32 = 3.0;
-pub const BUTTON_MIN_WIDTH: f32 = 54.0;
-pub const BUTTON_MAX_WIDTH: f32 = 76.0;
+pub const BUTTON_MIN_WIDTH: f32 = 58.0;
+pub const BUTTON_MAX_WIDTH: f32 = 84.0;
 pub const BUTTON_LABEL_PADDING: f32 = 10.0;
 /// Where a button's label starts below the button's top edge, under its icon.
-pub const BUTTON_LABEL_TOP: f32 = 32.0;
+pub const BUTTON_LABEL_TOP: f32 = 38.0;
 /// Room kept below a button's label, inside its highlight.
-pub const BUTTON_LABEL_BOTTOM: f32 = 2.0;
-pub const SECTION_HEIGHT: f32 = 20.0;
+pub const BUTTON_LABEL_BOTTOM: f32 = 3.0;
+pub const SECTION_HEIGHT: f32 = 22.0;
 
 /// The » button's room at the end of the panels, kept only while some panel is in it.
 pub const MORE_ROOM: f32 = 40.0;
@@ -690,7 +690,7 @@ pub fn show(ui: &mut egui::Ui, row: &Row, rect: Rect, more_rows: &mut dyn FnMut(
                 painter.rect_filled(br, t.radius_sm, t.hover);
             }
             if let Some(icon) = group.icon {
-                let icon_rect = Rect::from_center_size(br.center() - vec2(0.0, 3.0), vec2(26.0, 26.0));
+                let icon_rect = Rect::from_center_size(br.center() - vec2(0.0, 3.0), vec2(30.0, 30.0));
                 crate::tint::button(&painter, br, t.radius_sm, t.toolbar, group.enabled);
                 crate::tint::icon(&painter, icon_rect, icon, f32::from(t.icon.a()) / 255.0);
             }
@@ -706,7 +706,7 @@ pub fn show(ui: &mut egui::Ui, row: &Row, rect: Rect, more_rows: &mut dyn FnMut(
             let mut br = whole;
             if b.split.is_some() {
                 if labels {
-                    br.max.y = whole.top() + 32.0;
+                    br.max.y = whole.top() + 36.0;
                 } else {
                     br.max.x -= 14.0;
                 }
@@ -745,9 +745,9 @@ pub fn show(ui: &mut egui::Ui, row: &Row, rect: Rect, more_rows: &mut dyn FnMut(
                 paint_reveal(&painter, whole, &accent, r.strength, true);
                 solidcraft_ui_registry::publish_rect(h.reveal, whole);
             }
-            let side = if exit { 30.0 } else { 26.0 };
+            let side = 32.0;
             let icon_rect =
-                Rect::from_center_size(pos2(br.center().x, whole.top() + if labels { 16.0 } else { button_height / 2.0 }), vec2(side, side));
+                Rect::from_center_size(pos2(br.center().x, whole.top() + if labels { 18.0 } else { button_height / 2.0 }), vec2(side, side));
             crate::tint::button(&painter, whole, t.radius_sm, t.toolbar, b.enabled);
             crate::tint::icon(&painter, icon_rect, b.icon, if b.enabled && !b.planned { 1.0 } else { 0.35 });
             if !b.app_paints {
@@ -769,7 +769,7 @@ pub fn show(ui: &mut egui::Ui, row: &Row, rect: Rect, more_rows: &mut dyn FnMut(
                 });
             } else if let (Some(s), Some(split_id)) = (b.split, split_id) {
                 let ar = if labels {
-                    Rect::from_min_max(pos2(whole.left(), whole.top() + 30.0), pos2(whole.right(), whole.top() + 48.0))
+                    Rect::from_min_max(pos2(whole.left(), whole.top() + 36.0), pos2(whole.right(), whole.top() + 56.0))
                 } else {
                     Rect::from_min_max(pos2(br.right(), whole.top()), whole.right_bottom())
                 };
@@ -780,7 +780,7 @@ pub fn show(ui: &mut egui::Ui, row: &Row, rect: Rect, more_rows: &mut dyn FnMut(
                 }
                 // The title sits on the same line as the other buttons' labels.
                 if labels {
-                    let title_y = whole.top() + 39.0;
+                    let title_y = whole.top() + 46.0;
                     let galley = button_galley(&painter, s.title, ar.width() - 16.0, t.text);
                     painter.galley(pos2(ar.center().x - 4.0, title_y - galley.size().y / 2.0), galley, t.text);
                     dropdown_arrow(&painter, pos2(ar.right() - 6.0, title_y + 0.5), t.text_dim);
@@ -961,7 +961,7 @@ pub fn show(ui: &mut egui::Ui, row: &Row, rect: Rect, more_rows: &mut dyn FnMut(
 }
 
 /// The tab row's height.
-pub const TAB_ROW_HEIGHT: f32 = 30.0;
+pub const TAB_ROW_HEIGHT: f32 = 32.0;
 
 /// Where the tab row publishes its parts: each prefix is followed by a tab's id (or alias) or an
 /// action's id.
@@ -1066,7 +1066,7 @@ pub fn tab_style(t: &Tokens, accent: TabAccent, contextual: bool, active: bool, 
 /// The width of a tab or tab-row button labelled `label`.
 fn tab_width(ui: &egui::Ui, label: &str) -> f32 {
     let t = Tokens::get();
-    ui.painter().layout_no_wrap(label.to_string(), crate::type_face::semibold(t.font_button), t.text).size().x + 24.0
+    ui.painter().layout_no_wrap(label.to_string(), crate::type_face::semibold(t.font_button), t.text).size().x + 28.0
 }
 
 /// Draws the tab row in `row`: the tabs (scrolled sideways when they don't fit), the + button,
@@ -1139,6 +1139,13 @@ pub fn tabs(ui: &mut egui::Ui, row_data: &Tabs, row: Rect) -> TabsOut {
                     response.widget_info(|| egui::WidgetInfo::labeled(egui::Role::Button, true, tab.label));
                     let style = tab_style(&t, tab.accent, tab.contextual, active, response.hovered());
                     ui.painter().rect(tr, corner, style.fill, Stroke::new(1.0, style.outline), egui::StrokeKind::Inside);
+                    if active {
+                        let underline = Rect::from_min_max(
+                            pos2(tr.left() + 6.0, tr.bottom() - 2.0),
+                            pos2(tr.right() - 6.0, tr.bottom()),
+                        );
+                        ui.painter().rect_filled(underline, 1.0, tab.accent.color);
+                    }
                     text(ui, tr.center(), tab.label, t.font_button, style.ink, active || tab.contextual);
                     if ui.clip_rect().contains(tr.center()) {
                         solidcraft_ui_registry::publish_target(&handle(h.tab, tab.id), tr);
@@ -1474,7 +1481,7 @@ pub fn list_keys(ui: &egui::Ui, enabled: &[&str], style: &MenuStyle) {
 
 /// A grid menu's cell (#4739): the icon twice the size of a list row's, with room around it.
 pub const GRID_CELL: f32 = 48.0;
-const GRID_ICON: f32 = 32.0;
+const GRID_ICON: f32 = 36.0;
 /// Columns a grid fills before a second row; a group with fewer commands is as wide as it needs.
 pub const GRID_COLUMNS: usize = 5;
 /// Rows at most: a bigger menu grows to the right instead (unless the window is too narrow).
@@ -1691,38 +1698,49 @@ pub fn grid(ui: &mut egui::Ui, entries: &[(Option<&str>, MenuEntry)], loose: &[&
     let width = layout.size.x.max(200.0);
     // A narrow grid sits in the middle of the menu's least width.
     let inset = ((width - layout.size.x) / 2.0).max(0.0);
-    ui.set_width(width);
+    // Growing the popup itself is what keeps the rightmost column inside its frame. Setting
+    // only the inner scroll area's width leaves the backing surface at its previous list width.
+    ui.set_min_width(width);
+    ui.set_max_width(width);
     let plain: Vec<MenuEntry> = entries.iter().map(|(_, e)| *e).collect();
     let keys: Vec<(usize, usize)> = layout.cells.iter().map(|(_, at)| *at).collect();
     grid_keys(ui, &plain, &keys, style);
     // Like the list, the grid scrolls when it would run past the window's bottom (#874).
     let height = (ui.ctx().content_rect().bottom() - ui.cursor().top() - 64.0).max(GRID_CELL * 2.0);
     let mut out = GridOut { action: None, cells: Vec::new() };
-    egui::ScrollArea::vertical().id_salt("panel_menu_grid").max_height(height).min_scrolled_height(height).show(ui, |ui| {
-        let (area, _) = ui.allocate_exact_size(vec2(width, layout.size.y), Sense::hover());
-        let origin = area.left_top() + vec2(inset, 0.0);
-        let t = Tokens::get();
-        for (at, w, heading) in &layout.headings {
-            let clip = ui.clip_rect().intersect(Rect::from_min_size(origin + at.to_vec2(), vec2(*w, GRID_HEADING)));
-            let painter = ui.painter().with_clip_rect(clip);
-            // Centred over its group's icons.
-            let centre = origin + at.to_vec2() + vec2(w / 2.0, GRID_HEADING / 2.0);
-            painter.text(centre, egui::Align2::CENTER_CENTER, *heading, heading_font(), t.text_dim);
-        }
-        // A line between groups side by side, as between the ribbon's groups.
-        for x in &layout.separators {
-            let x = origin.x + x;
-            ui.painter().line_segment([pos2(x, origin.y + 4.0), pos2(x, origin.y + layout.size.y - 4.0)], crate::Menu::separator_stroke(&t));
-        }
-        for (index, (entry, (rect, _))) in plain.iter().zip(&layout.cells).enumerate() {
-            let rect = rect.translate(origin.to_vec2());
-            let (action, cell) = grid_cell(ui, entry, rect, style);
-            out.cells.push(GridCell { index, ..cell });
-            if let Some(action) = action {
-                out.action = Some((index, action));
+    egui::ScrollArea::vertical()
+        .id_salt("panel_menu_grid")
+        .auto_shrink([false, true])
+        .max_height(height)
+        .min_scrolled_height(height)
+        .show(ui, |ui| {
+            let (area, _) = ui.allocate_exact_size(vec2(width, layout.size.y), Sense::hover());
+            let origin = area.left_top() + vec2(inset, 0.0);
+            let t = Tokens::get();
+            for (at, w, heading) in &layout.headings {
+                let clip = ui.clip_rect().intersect(Rect::from_min_size(origin + at.to_vec2(), vec2(*w, GRID_HEADING)));
+                let painter = ui.painter().with_clip_rect(clip);
+                // Centred over its group's icons.
+                let centre = origin + at.to_vec2() + vec2(w / 2.0, GRID_HEADING / 2.0);
+                painter.text(centre, egui::Align2::CENTER_CENTER, *heading, heading_font(), t.text_dim);
             }
-        }
-    });
+            // A line between groups side by side, as between the ribbon's groups.
+            for x in &layout.separators {
+                let x = origin.x + x;
+                ui.painter().line_segment(
+                    [pos2(x, origin.y + 4.0), pos2(x, origin.y + layout.size.y - 4.0)],
+                    crate::Menu::separator_stroke(&t),
+                );
+            }
+            for (index, (entry, (rect, _))) in plain.iter().zip(&layout.cells).enumerate() {
+                let rect = rect.translate(origin.to_vec2());
+                let (action, cell) = grid_cell(ui, entry, rect, style);
+                out.cells.push(GridCell { index, ..cell });
+                if let Some(action) = action {
+                    out.action = Some((index, action));
+                }
+            }
+        });
     out
 }
 

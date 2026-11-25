@@ -10,7 +10,7 @@ Source today: Interface page (`prefs/interface.rs`, `prefs/navbar.rs`).
 |---|---|---|---|---|---|---|
 | Workspace | Segmented: Floating / Compact | `Prefs.layout` (`shell::LayoutMode`: `Floating`, and `Docked` serialised as `compact`) | Floating | none | `layout-schematic` | Today's labels are Floating and Docked; the board says Compact (the serialised name is `compact`). |
 | Toolbar | Segmented: Labels / Icons only | `Prefs.ribbon_labels` | `true` (Labels) | none | none | |
-| Menus | Segmented: List / Large icons | `Prefs.ribbon_icon_grid` | `false` (List) | none | none | |
+| Menus | Segmented: List / Large icons | `Prefs.ribbon_icon_grid` | `true` (Large icons) | none | none | |
 | Notices | Segmented: Bottom right / Bottom centre | `Prefs.toast_place` (`ToastPlace`; Corner = Bottom right) | Corner (Bottom right) | none | none | |
 | Status bar | Checkbox | `Prefs.status_bar` | `false` | "What is being edited, the sketch state and units." | none | |
 | Layout preview | Schematic (262 wide) of the window, showing the choices above | none | n/a | none | `layout-schematic` | Reflects the Workspace choice and the History, Browser and Dialog choices below. |

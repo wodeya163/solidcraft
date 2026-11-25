@@ -97,15 +97,15 @@ fn panels_fill_the_room_they_have_at_every_width() {
 fn variable_width_buttons_narrow_before_rightmost_equal_panels_lose_buttons() {
     let panels = vec![PanelSize {
         buttons: vec![
-            ButtonSize { width: 76.0, min_width: BUTTON_MIN_WIDTH },
-            ButtonSize { width: 63.0, min_width: BUTTON_MIN_WIDTH },
-            ButtonSize { width: 54.0, min_width: BUTTON_MIN_WIDTH },
+            ButtonSize { width: BUTTON_MAX_WIDTH, min_width: BUTTON_MIN_WIDTH },
+            ButtonSize { width: BUTTON_MAX_WIDTH - 13.0, min_width: BUTTON_MIN_WIDTH },
+            ButtonSize { width: BUTTON_MIN_WIDTH, min_width: BUTTON_MIN_WIDTH },
         ],
     }];
     let full = used(&panels.iter().map(Plan::full).collect::<Vec<_>>());
     let narrow = fit(&panels, full - 1.0);
     assert_eq!(narrow[0].shown, 3);
-    assert_eq!(narrow[0].widths, [75.0, 62.0, 54.0]);
+    assert_eq!(narrow[0].widths, [BUTTON_MAX_WIDTH - 1.0, BUTTON_MAX_WIDTH - 14.0, BUTTON_MIN_WIDTH]);
     let minimum = panel_width(&[BUTTON_MIN_WIDTH; 3]) + PANEL_GAP;
     let narrow = fit(&panels, minimum);
     assert_eq!(narrow[0].shown, 3);

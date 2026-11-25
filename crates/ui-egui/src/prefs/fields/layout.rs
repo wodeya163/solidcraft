@@ -119,13 +119,14 @@ macro_rules! layout_preferences {
             /// Each design tab keeps its toolbar tab (MODEL, SURFACE, ...) while another design is shown,
             /// with or without `keep_work_on_tab_switch`. Off: a switch shows the MODEL tab, as before.
             remember_toolbar_tab: bool = false, PAGE_LAYOUT;
-            /// Show the ribbon's panel drop-downs as a grid of large icons, their names in the tooltips,
-            /// instead of a list of small icons with names (#4739).
-            ribbon_icon_grid: bool = false, PAGE_LAYOUT;
+            /// Show the ribbon's panel drop-downs as a grid of large icons, their names in the tooltips.
+            /// On by default: command flyouts keep the same visual weight as the ribbon buttons.
+            ribbon_icon_grid: bool = true, PAGE_LAYOUT;
             /// Show command names beneath ribbon icons, independently of workspace layout.
             ribbon_labels: bool = true, PAGE_LAYOUT;
             /// After a ribbon panel menu is open, hover another panel to switch to its menu.
-            ribbon_menus_follow_hover: bool = false, PAGE_LAYOUT;
+            /// On by default: one visit to the ribbon browses related command groups without extra clicks.
+            ribbon_menus_follow_hover: bool = true, PAGE_LAYOUT;
             /// Leave the commands the ribbon shows as buttons (pinned ones) out of its panel drop-downs,
             /// which then list only the rest (#4739).
             ribbon_menus_skip_pinned: bool = false, PAGE_LAYOUT;

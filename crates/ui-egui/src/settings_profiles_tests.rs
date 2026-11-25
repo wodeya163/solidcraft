@@ -932,7 +932,8 @@ fn profile_keys_cover_the_current_portable_preferences() {
 fn moved_profile_settings_survive_saved_roundtrip_and_apply() {
     let mut h = Harness::new();
     let defaults = crate::prefs::Prefs::default();
-    assert!(!defaults.keep_work_on_tab_switch && !defaults.line_hover_tangent_arc && !defaults.ribbon_menus_follow_hover);
+    assert!(!defaults.keep_work_on_tab_switch && !defaults.line_hover_tangent_arc);
+    assert!(defaults.ribbon_menus_follow_hover);
     for (key, page) in [("keep_work_on_tab_switch", crate::prefs::PAGE_LAYOUT), ("line_hover_tangent_arc", crate::prefs::PAGE_SKETCH)] {
         let homes: Vec<_> = crate::prefs::FIELD_PAGES.iter().filter_map(|(field, page)| (*field == key).then_some(*page)).collect();
         assert_eq!(homes, [Some(page)], "{key} keeps its new page home");

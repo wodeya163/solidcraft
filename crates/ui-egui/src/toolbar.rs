@@ -1232,7 +1232,16 @@ const RENDER_JOBS: [&str; 2] = ["render.start", "render.cancel"];
 fn ribbon_tabs(app: &mut SolveApp, ui: &mut egui::Ui, row: Rect) -> Option<bool> {
     let t = Tokens::get();
     let ids = crate::workspace::visible_tabs(app);
-    let labels: Vec<String> = ids.iter().map(|tab| ribbon_label(app, tab)).collect();
+    let labels: Vec<String> = ids
+        .iter()
+        .map(|tab| {
+            if *tab == "MODEL" {
+                app.tr("ui.heading_solid").to_string()
+            } else {
+                ribbon_label(app, tab)
+            }
+        })
+        .collect();
     let render = crate::render_workspace::active(app);
     // The application bar may hold the search field instead ([`HeaderLayout`]): the tabs then
     // run to the row's end.
@@ -4914,12 +4923,12 @@ mod dropdown_tests {
             let menu = crate::scenario::rect_of("toolbar_dropdown").expect("the drop-down is open");
             (menu, crate::scenario::handles("dropdown:"))
         };
-        let (_, list) = open(&mut h);
+        let (_, grid) = open(&mut h);
         h.step(&json!({"key":"Escape"})).unwrap();
-        assert!(!h.app.preferences.ribbon_icon_grid, "the list stays the default");
-        h.call("ui.prefs", json!({"ribbon_icon_grid": true}));
-        assert!(h.app.preferences.ribbon_icon_grid);
-        let (menu, grid) = open(&mut h);
+        assert!(h.app.preferences.ribbon_icon_grid, "large icons are the default");
+        h.call("ui.prefs", json!({"ribbon_icon_grid": false}));
+        assert!(!h.app.preferences.ribbon_icon_grid);
+        let (menu, list) = open(&mut h);
         let ids = |rows: &[(String, egui::Pos2)]| rows.iter().map(|(id, _)| id.clone()).collect::<Vec<_>>();
         assert_eq!(ids(&grid), ids(&list), "the grid shows the list's commands in its order");
         assert!(grid.len() > ribbon::GRID_COLUMNS * ribbon::GRID_ROWS, "MODEL CREATE is a big menu: {grid:?}");
