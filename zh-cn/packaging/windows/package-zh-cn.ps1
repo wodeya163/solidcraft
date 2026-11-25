@@ -139,7 +139,19 @@ if (-not $SkipWix) {
         -d "BinDir=$Stage" -d "IconPath=$Icon" -o $Msi
     if ($LASTEXITCODE -ne 0) { throw "WiX 构建失败，退出码 $LASTEXITCODE" }
     $pdb = [IO.Path]::ChangeExtension($Msi, '.wixpdb')
-    if (Test-Path $pdb) { Remove-Item $pdb -Force -ErrorAction SilentlyContinue }
+    if (Test-Path $pdb) {
+        # 本机 safe-delete 守卫会对 Remove-Item 抛 [SAFE_DELETE_FAIL_CLOSED]；
+        # 清理只是辅助动作，绝不让它中断打包。
+        try {
+            $oldPref = $ErrorActionPreference
+            $ErrorActionPreference = 'Continue'
+            Remove-Item -LiteralPath $pdb -Force -ErrorAction SilentlyContinue
+        } catch {
+            Write-Host "    忽略 .wixpdb 清理失败：$($_.Exception.Message)"
+        } finally {
+            $ErrorActionPreference = $oldPref
+        }
+    }
     Write-Host "    MSI：$([math]::Round((Get-Item $Msi).Length / 1MB, 1)) MB"
 }
 
