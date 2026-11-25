@@ -2183,6 +2183,13 @@ fn ribbon_contents(app: &mut SolveApp, ui: &mut egui::Ui, shape: RibbonShape) ->
             if open || previewed {
                 let cmds = if collapsed || trimmed { menu_commands(cmds, shown) } else { cmds.clone() };
                 let cmds = if app.preferences.ribbon_menus_skip_pinned { skip_on_ribbon(cmds, &on_ribbon) } else { cmds };
+                // The area's first sizing pass starts at the old 200 px list width. Reserve the
+                // grid's columns here, before the menu frame, so the backing surface grows with it.
+                if app.preferences.ribbon_icon_grid && *panel != "SELECT" && !cmds.is_empty() {
+                    let columns = cmds.len().div_ceil(ribbon::GRID_ROWS).max(ribbon::GRID_COLUMNS);
+                    let width = columns as f32 * ribbon::GRID_CELL + t.space_6 * 2.0 + 14.0;
+                    ui.set_min_width(width.max(200.0));
+                }
                 let area = Container::new(ui.ctx(), Surface::Popup)
                     .area(popup_id)
                     .fixed_pos(lr.left_bottom())
@@ -4821,7 +4828,7 @@ mod dropdown_tests {
         assert_eq!(at(&side), [(0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (0, 2), (0, 3)]);
         let headings: Vec<_> = side.headings.iter().map(|(p, _, h)| (p.x, *h)).collect();
         assert_eq!(headings, [(0.0, "Primitives"), (2.0 * ribbon::GRID_CELL, "Other")]);
-        assert_eq!(side.size, vec2(4.0 * ribbon::GRID_CELL, ribbon::GRID_HEADING + 3.0 * ribbon::GRID_CELL));
+        assert_eq!(side.size, vec2(4.0 * ribbon::GRID_CELL, ribbon::GRID_HEADING + 3.0 * ribbon::GRID_CELL_HEIGHT));
         assert_eq!(side.separators, [2.0 * ribbon::GRID_CELL], "a line between the two groups");
         assert!(rows.separators.is_empty(), "rows have none");
         assert!(side.cells.iter().all(|(r, _)| r.top() >= ribbon::GRID_HEADING), "icons below the headings");
@@ -4903,7 +4910,7 @@ mod dropdown_tests {
         let few = [(None, c("solid.box")), (None, c("solid.sphere"))];
         assert_eq!(
             ribbon::grid_layout(&grid_ids(&few), &[], 4000.0).size,
-            vec2(2.0 * ribbon::GRID_CELL, ribbon::GRID_CELL),
+            vec2(2.0 * ribbon::GRID_CELL, ribbon::GRID_CELL_HEIGHT),
             "a small menu is one row"
         );
     }
@@ -7401,7 +7408,7 @@ mod persistent_ribbon_tests {
 
     fn status_grid_rect(_h: &Harness, id: &str) -> Rect {
         let at = scenario::handle_at(&format!("dropdown:{id}")).unwrap();
-        Rect::from_center_size(at, vec2(ribbon::GRID_CELL, ribbon::GRID_CELL)).shrink(2.0)
+        Rect::from_center_size(at, vec2(ribbon::GRID_CELL, ribbon::GRID_CELL_HEIGHT)).shrink(2.0)
     }
 
     fn assert_status_grid(h: &Harness, id: &str, selected: bool, toggled: Option<egui::accesskit::Toggled>) {
@@ -7466,7 +7473,7 @@ mod persistent_ribbon_tests {
                             ui.spacing_mut().item_spacing.y = 0.0;
                             for id in ["inspect.section", "inspect.zebra", "inspect.draft"] {
                                 let command = solidcraft_engine::find_command(id).unwrap();
-                                let (rect, _) = ui.allocate_exact_size(vec2(ribbon::GRID_CELL, ribbon::GRID_CELL), Sense::hover());
+                                let (rect, _) = ui.allocate_exact_size(vec2(ribbon::GRID_CELL, ribbon::GRID_CELL_HEIGHT), Sense::hover());
                                 let clip = ui.clip_rect().intersect(rect);
                                 let _ = dropdown_cell(&h.app, ui, command, rect, false, &mut paints);
                                 if id != "inspect.draft" {

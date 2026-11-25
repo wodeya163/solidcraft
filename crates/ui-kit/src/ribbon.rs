@@ -882,9 +882,10 @@ pub fn show(ui: &mut egui::Ui, row: &Row, rect: Rect, more_rows: &mut dyn FnMut(
         }
         let open = group.open || hidden_running;
         let font = if open || hot { crate::type_face::semibold(t.font_caption) } else { FontId::proportional(t.font_caption) };
-        let label_width = painter.layout_no_wrap(group.label.to_string(), font, t.text_dim).size().x;
+        let caption = group.label.to_uppercase();
+        let label_width = painter.layout_no_wrap(caption.clone(), font, t.text_dim).size().x;
         let ink = if open { accent.ink } else { t.text_dim };
-        text(ui, lr.center() - vec2(if exit { 0.0 } else { 6.0 }, 0.0), group.label, t.font_caption, ink, open || hot);
+        text(ui, lr.center() - vec2(if exit { 0.0 } else { 6.0 }, 0.0), &caption, t.font_caption, ink, open || hot);
         if !exit {
             dropdown_arrow(&painter, pos2(lr.center().x + label_width / 2.0 + 1.0, lr.center().y + 0.5), ink);
         }
@@ -1074,7 +1075,10 @@ fn tab_width(ui: &egui::Ui, label: &str) -> f32 {
 pub fn tabs(ui: &mut egui::Ui, row_data: &Tabs, row: Rect) -> TabsOut {
     let t = Tokens::get();
     let h = &row_data.handles;
-    let widths: Vec<f32> = row_data.tabs.iter().map(|tab| tab_width(ui, tab.label)).collect();
+    // Fusion's tabs read as short uppercase labels ("SOLID", "SURFACE"); languages without case
+    // are unchanged.
+    let labels: Vec<String> = row_data.tabs.iter().map(|tab| tab.label.to_uppercase()).collect();
+    let widths: Vec<f32> = labels.iter().map(|label| tab_width(ui, label)).collect();
     let inset = CARD_INSET;
     let add_size = TAB_ROW_HEIGHT - 2.0 * inset;
     let tabs_width: f32 = widths.iter().sum::<f32>()
@@ -1146,7 +1150,8 @@ pub fn tabs(ui: &mut egui::Ui, row_data: &Tabs, row: Rect) -> TabsOut {
                         );
                         ui.painter().rect_filled(underline, 1.0, tab.accent.color);
                     }
-                    text(ui, tr.center(), tab.label, t.font_button, style.ink, active || tab.contextual);
+                    let drawn_label = labels.get(index).map(String::as_str).unwrap_or(tab.label);
+                    text(ui, tr.center(), drawn_label, t.font_button, style.ink, active || tab.contextual);
                     if ui.clip_rect().contains(tr.center()) {
                         solidcraft_ui_registry::publish_target(&handle(h.tab, tab.id), tr);
                         solidcraft_ui_registry::publish_rect(&handle(h.tab_rect, tab.id), tr);
@@ -1479,11 +1484,13 @@ pub fn list_keys(ui: &egui::Ui, enabled: &[&str], style: &MenuStyle) {
     }
 }
 
-/// A grid menu's cell (#4739): the icon twice the size of a list row's, with room around it.
-pub const GRID_CELL: f32 = 48.0;
-const GRID_ICON: f32 = 36.0;
+/// A grid menu's cell (#4739): a large icon with the command's name under it, the shape of
+/// Fusion's panel flyouts. `GRID_CELL` is a cell's width, `GRID_CELL_HEIGHT` its height.
+pub const GRID_CELL: f32 = 76.0;
+pub const GRID_CELL_HEIGHT: f32 = 64.0;
+const GRID_ICON: f32 = 30.0;
 /// Columns a grid fills before a second row; a group with fewer commands is as wide as it needs.
-pub const GRID_COLUMNS: usize = 5;
+pub const GRID_COLUMNS: usize = 4;
 /// Rows at most: a bigger menu grows to the right instead (unless the window is too narrow).
 pub const GRID_ROWS: usize = 3;
 /// The height of a group's heading in a grid menu.
@@ -1529,7 +1536,7 @@ pub fn grid_layout<'a>(grouped: &[(Option<&'a str>, &str)], loose: &[&str], room
     let mut cells = vec![(Rect::NOTHING, (0, 0)); grouped.len()];
     let mut headings = Vec::new();
     let mut separators = Vec::new();
-    let cell = |x: f32, y: f32| Rect::from_min_size(pos2(x, y), vec2(GRID_CELL, GRID_CELL));
+    let cell = |x: f32, y: f32| Rect::from_min_size(pos2(x, y), vec2(GRID_CELL, GRID_CELL_HEIGHT));
     let size = if side_by_side {
         let (mut first_column, mut rows) = (0, 0);
         for (g, (heading, items)) in groups.iter().enumerate() {
@@ -1544,13 +1551,13 @@ pub fn grid_layout<'a>(grouped: &[(Option<&'a str>, &str)], loose: &[&str], room
             for (k, i) in items.iter().enumerate() {
                 let (row, column) = (k / columns, k % columns);
                 if let Some(slot) = cells.get_mut(*i) {
-                    *slot = (cell(x + column as f32 * GRID_CELL, GRID_HEADING + row as f32 * GRID_CELL), (row, first_column + column));
+                    *slot = (cell(x + column as f32 * GRID_CELL, GRID_HEADING + row as f32 * GRID_CELL_HEIGHT), (row, first_column + column));
                 }
             }
             rows = rows.max(items.len().div_ceil(columns));
             first_column += columns;
         }
-        vec2(first_column as f32 * GRID_CELL, GRID_HEADING + rows as f32 * GRID_CELL)
+        vec2(first_column as f32 * GRID_CELL, GRID_HEADING + rows as f32 * GRID_CELL_HEIGHT)
     } else {
         let n = grouped.len();
         let fit = ((room / GRID_CELL).floor() as usize).max(1);
@@ -1564,11 +1571,11 @@ pub fn grid_layout<'a>(grouped: &[(Option<&'a str>, &str)], loose: &[&str], room
             for (k, i) in items.iter().enumerate() {
                 let (row, column) = (k / columns, k % columns);
                 if let Some(slot) = cells.get_mut(*i) {
-                    *slot = (cell(column as f32 * GRID_CELL, y + row as f32 * GRID_CELL), (first_row + row, column));
+                    *slot = (cell(column as f32 * GRID_CELL, y + row as f32 * GRID_CELL_HEIGHT), (first_row + row, column));
                 }
             }
             let rows = items.len().div_ceil(columns);
-            y += rows as f32 * GRID_CELL;
+            y += rows as f32 * GRID_CELL_HEIGHT;
             first_row += rows;
         }
         vec2(columns as f32 * GRID_CELL, y)
@@ -1706,41 +1713,48 @@ pub fn grid(ui: &mut egui::Ui, entries: &[(Option<&str>, MenuEntry)], loose: &[&
     let keys: Vec<(usize, usize)> = layout.cells.iter().map(|(_, at)| *at).collect();
     grid_keys(ui, &plain, &keys, style);
     // Like the list, the grid scrolls when it would run past the window's bottom (#874).
-    let height = (ui.ctx().content_rect().bottom() - ui.cursor().top() - 64.0).max(GRID_CELL * 2.0);
+    let height = (ui.ctx().content_rect().bottom() - ui.cursor().top() - 64.0).max(GRID_CELL_HEIGHT * 2.0);
     let mut out = GridOut { action: None, cells: Vec::new() };
-    egui::ScrollArea::vertical()
-        .id_salt("panel_menu_grid")
-        .auto_shrink([false, true])
-        .max_height(height)
-        .min_scrolled_height(height)
-        .show(ui, |ui| {
-            let (area, _) = ui.allocate_exact_size(vec2(width, layout.size.y), Sense::hover());
-            let origin = area.left_top() + vec2(inset, 0.0);
-            let t = Tokens::get();
-            for (at, w, heading) in &layout.headings {
-                let clip = ui.clip_rect().intersect(Rect::from_min_size(origin + at.to_vec2(), vec2(*w, GRID_HEADING)));
-                let painter = ui.painter().with_clip_rect(clip);
-                // Centred over its group's icons.
-                let centre = origin + at.to_vec2() + vec2(w / 2.0, GRID_HEADING / 2.0);
-                painter.text(centre, egui::Align2::CENTER_CENTER, *heading, heading_font(), t.text_dim);
+    let mut draw = |ui: &mut egui::Ui| {
+        let (area, _) = ui.allocate_exact_size(vec2(width, layout.size.y), Sense::hover());
+        let origin = area.left_top() + vec2(inset, 0.0);
+        let t = Tokens::get();
+        for (at, w, heading) in &layout.headings {
+            let clip = ui.clip_rect().intersect(Rect::from_min_size(origin + at.to_vec2(), vec2(*w, GRID_HEADING)));
+            let painter = ui.painter().with_clip_rect(clip);
+            // Centred over its group's icons.
+            let centre = origin + at.to_vec2() + vec2(w / 2.0, GRID_HEADING / 2.0);
+            painter.text(centre, egui::Align2::CENTER_CENTER, *heading, heading_font(), t.text_dim);
+        }
+        // A line between groups side by side, as between the ribbon's groups.
+        for x in &layout.separators {
+            let x = origin.x + x;
+            ui.painter().line_segment(
+                [pos2(x, origin.y + 4.0), pos2(x, origin.y + layout.size.y - 4.0)],
+                crate::Menu::separator_stroke(&t),
+            );
+        }
+        for (index, (entry, (rect, _))) in plain.iter().zip(&layout.cells).enumerate() {
+            let rect = rect.translate(origin.to_vec2());
+            let (action, cell) = grid_cell(ui, entry, rect, style);
+            out.cells.push(GridCell { index, ..cell });
+            if let Some(action) = action {
+                out.action = Some((index, action));
             }
-            // A line between groups side by side, as between the ribbon's groups.
-            for x in &layout.separators {
-                let x = origin.x + x;
-                ui.painter().line_segment(
-                    [pos2(x, origin.y + 4.0), pos2(x, origin.y + layout.size.y - 4.0)],
-                    crate::Menu::separator_stroke(&t),
-                );
-            }
-            for (index, (entry, (rect, _))) in plain.iter().zip(&layout.cells).enumerate() {
-                let rect = rect.translate(origin.to_vec2());
-                let (action, cell) = grid_cell(ui, entry, rect, style);
-                out.cells.push(GridCell { index, ..cell });
-                if let Some(action) = action {
-                    out.action = Some((index, action));
-                }
-            }
-        });
+        }
+    };
+    // A scroll host fixes the popup at its child's old width. Use it only when the height really
+    // needs it; a menu that fits lays its columns out directly so the backing surface grows too.
+    if layout.size.y <= height {
+        draw(ui);
+    } else {
+        egui::ScrollArea::vertical()
+            .id_salt("panel_menu_grid")
+            .auto_shrink([false, true])
+            .max_height(height)
+            .min_scrolled_height(height)
+            .show(ui, draw);
+    }
     out
 }
 
@@ -1791,7 +1805,24 @@ pub fn grid_cell(ui: &mut egui::Ui, entry: &MenuEntry, rect: Rect, style: &MenuS
         painter.add(neutral);
         None
     };
-    crate::tint::icon(&painter, Rect::from_center_size(rect.center(), vec2(GRID_ICON, GRID_ICON)), entry.icon, if entry.enabled { 1.0 } else { 0.4 });
+    crate::tint::icon(
+        &painter,
+        Rect::from_center_size(pos2(rect.center().x, rect.top() + 23.0), vec2(GRID_ICON, GRID_ICON)),
+        entry.icon,
+        if entry.enabled { 1.0 } else { 0.4 },
+    );
+    // Fusion's flyout names each command under its icon; an app-painted cell labels itself
+    // ([`paint_deferred`]).
+    if !entry.app_paints {
+        let ink = if entry.enabled { t.text } else { t.text_dim };
+        painter.text(
+            pos2(rect.center().x, rect.bottom() - 2.0),
+            egui::Align2::CENTER_BOTTOM,
+            entry.label,
+            FontId::proportional(t.font_caption),
+            ink,
+        );
+    }
     // A pinned entry always shows its pin, clear of the icon's own artwork; any other shows one
     // to pin it once it can be clicked.
     if entry.pinned || armed {
