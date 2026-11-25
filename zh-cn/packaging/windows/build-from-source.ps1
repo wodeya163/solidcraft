@@ -24,13 +24,15 @@
 param(
     [string] $Version = '0.49.0',
     [string] $Dist = '',
+    # 云端 Actions 有 MSVC，默认 x86_64-pc-windows-msvc；本机无 Visual Studio 时
+    # 可配合免安装 MinGW-w64 用 -Target x86_64-pc-windows-gnu。
+    [string] $Target = 'x86_64-pc-windows-msvc',
     [switch] $SkipBuild,
     [switch] $SkipInstaller
 )
 $ErrorActionPreference = 'Stop'
 
 $Root   = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
-$Target = 'x86_64-pc-windows-msvc'
 $BinDir = Join-Path $Root "target\$Target\release"
 if (-not $Dist) { $Dist = Join-Path $Root 'dist\release' }
 New-Item -ItemType Directory -Path $Dist -Force | Out-Null

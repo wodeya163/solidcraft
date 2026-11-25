@@ -1,4 +1,4 @@
-; SolidCraft 中文版 —— Windows 免管理员 exe 安装程序（NSIS，Unicode）
+﻿; SolidCraft 中文版 —— Windows 免管理员 exe 安装程序（NSIS，Unicode）
 ;
 ; 由 zh-cn/packaging/windows/build-from-source.ps1 调用：
 ;   makensis /DVERSION=0.49.0 /DSTAGE_DIR=<stage\bin> /DOUT_FILE=<输出 exe> installer.nsi
